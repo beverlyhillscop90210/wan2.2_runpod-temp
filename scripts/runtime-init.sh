@@ -61,7 +61,10 @@ uv pip install --no-cache \
     opencv-python \
     scipy
 
-echo "⚡ Installing SageAttention dependencies..."
+echo "==================================================================="
+echo "⚡⚡⚡ SAGEATTENTION BUILD STARTING ⚡⚡⚡"
+echo "==================================================================="
+echo "📦 Installing SageAttention dependencies (wheel, setuptools, ninja, triton)..."
 uv pip install --no-cache \
     wheel \
     setuptools \
@@ -69,8 +72,18 @@ uv pip install --no-cache \
     ninja \
     triton
 
-echo "🚀 Installing SageAttention2..."
+echo ""
+echo "==================================================================="
+echo "🚀🚀🚀 BUILDING SAGEATTENTION2 - THIS MAY TAKE A FEW MINUTES 🚀🚀🚀"
+echo "==================================================================="
+echo "⏳ Compiling CUDA kernels for optimal performance..."
+echo "💡 Watch for compilation messages below..."
+echo "-------------------------------------------------------------------"
 uv pip install --no-cache sageattention
+echo "-------------------------------------------------------------------"
+echo "✅✅✅ SAGEATTENTION2 BUILD COMPLETE ✅✅✅"
+echo "==================================================================="
+echo ""
 
 echo "📓 Installing JupyterLab..."
 uv pip install --no-cache \
