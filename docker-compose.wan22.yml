@@ -1,0 +1,47 @@
+services:
+  wan22-runpod:
+    build:
+      context: .
+      dockerfile: Dockerfile.wan22
+    image: ghcr.io/lum3on/wan22-runpod:latest
+    container_name: wan22-comfyui
+
+    # GPU support
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    # Environment variables
+    environment:
+      - SERVE_API_LOCALLY=true
+      - COMFY_LOG_LEVEL=DEBUG
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility
+    
+    # Ports
+    ports:
+      - "8188:8188"  # ComfyUI API
+      - "8189:8189"  # JupyterLab
+    
+    # Volumes (optional - for persistent storage)
+    volumes:
+      - ./models:/comfyui/models
+      - ./output:/comfyui/output
+      - ./input:/comfyui/input
+      - ./custom_nodes:/comfyui/custom_nodes
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8188/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
