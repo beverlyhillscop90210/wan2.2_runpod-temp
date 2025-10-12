@@ -51,7 +51,52 @@ if [ ! -d "ComfyUI-WanVideoWrapper" ]; then
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 fi
 
-echo "📚 Installing WAN Video Wrapper dependencies..."
+# Install ComfyUI-KJNodes
+if [ ! -d "ComfyUI-KJNodes" ]; then
+    echo "Installing ComfyUI-KJNodes..."
+    git clone https://github.com/kijai/ComfyUI-KJNodes.git
+fi
+
+# Install ComfyUI-VideoHelperSuite
+if [ ! -d "ComfyUI-VideoHelperSuite" ]; then
+    echo "Installing ComfyUI-VideoHelperSuite..."
+    git clone https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite.git
+fi
+
+# Install masquerade-nodes-comfyui
+if [ ! -d "masquerade-nodes-comfyui" ]; then
+    echo "Installing masquerade-nodes-comfyui..."
+    git clone https://github.com/BadCafeCode/masquerade-nodes-comfyui.git
+fi
+
+# Install ComfyLiterals
+if [ ! -d "ComfyLiterals" ]; then
+    echo "Installing ComfyLiterals..."
+    git clone https://github.com/M1kep/ComfyLiterals.git
+fi
+
+# Install ComfyUI_Fill-Nodes
+if [ ! -d "ComfyUI_Fill-Nodes" ]; then
+    echo "Installing ComfyUI_Fill-Nodes..."
+    git clone https://github.com/filliptm/ComfyUI_Fill-Nodes.git
+fi
+
+# Install ComfyUI_LayerStyle
+if [ ! -d "ComfyUI_LayerStyle" ]; then
+    echo "Installing ComfyUI_LayerStyle..."
+    git clone https://github.com/chflame163/ComfyUI_LayerStyle.git
+fi
+
+# Install ComfyUI_LayerStyle_Advance
+if [ ! -d "ComfyUI_LayerStyle_Advance" ]; then
+    echo "Installing ComfyUI_LayerStyle_Advance..."
+    git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance.git
+fi
+
+echo "📚 Installing custom node dependencies..."
+
+# WAN Video Wrapper dependencies
+echo "  → WAN Video Wrapper..."
 uv pip install --no-cache \
     ftfy \
     accelerate>=1.2.1 \
@@ -64,6 +109,38 @@ uv pip install --no-cache \
     gguf>=0.17.1 \
     opencv-python \
     scipy
+
+# ComfyUI-KJNodes dependencies
+if [ -f "ComfyUI-KJNodes/requirements.txt" ]; then
+    echo "  → ComfyUI-KJNodes..."
+    uv pip install --no-cache -r ComfyUI-KJNodes/requirements.txt
+fi
+
+# ComfyUI-VideoHelperSuite dependencies
+if [ -f "ComfyUI-VideoHelperSuite/requirements.txt" ]; then
+    echo "  → ComfyUI-VideoHelperSuite..."
+    uv pip install --no-cache -r ComfyUI-VideoHelperSuite/requirements.txt
+fi
+
+# ComfyUI_Fill-Nodes dependencies
+if [ -f "ComfyUI_Fill-Nodes/requirements.txt" ]; then
+    echo "  → ComfyUI_Fill-Nodes..."
+    uv pip install --no-cache -r ComfyUI_Fill-Nodes/requirements.txt
+fi
+
+# ComfyUI_LayerStyle dependencies
+if [ -f "ComfyUI_LayerStyle/requirements.txt" ]; then
+    echo "  → ComfyUI_LayerStyle..."
+    uv pip install --no-cache -r ComfyUI_LayerStyle/requirements.txt
+fi
+
+# ComfyUI_LayerStyle_Advance dependencies
+if [ -f "ComfyUI_LayerStyle_Advance/requirements.txt" ]; then
+    echo "  → ComfyUI_LayerStyle_Advance..."
+    uv pip install --no-cache -r ComfyUI_LayerStyle_Advance/requirements.txt
+fi
+
+echo "✅ Custom nodes and dependencies installed!"
 
 echo "==================================================================="
 echo "⚡ SageAttention2++ Build Starting"
