@@ -101,6 +101,12 @@ if [ ! -d "ComfyUI_LayerStyle_Advance" ]; then
     git clone https://github.com/chflame163/ComfyUI_LayerStyle_Advance.git
 fi
 
+# Install ComfyUI_performance-report
+if [ ! -d "ComfyUI_performance-report" ]; then
+    echo "Installing ComfyUI_performance-report..."
+    git clone https://github.com/njlent/ComfyUI_performance-report.git
+fi
+
 echo "📚 Installing custom node dependencies..."
 
 # WAN Video Wrapper dependencies
@@ -146,6 +152,12 @@ fi
 if [ -f "ComfyUI_LayerStyle_Advance/requirements.txt" ]; then
     echo "  → ComfyUI_LayerStyle_Advance..."
     uv pip install --no-cache -r ComfyUI_LayerStyle_Advance/requirements.txt
+fi
+
+# ComfyUI_performance-report dependencies
+if [ -f "ComfyUI_performance-report/requirements.txt" ]; then
+    echo "  → ComfyUI_performance-report..."
+    uv pip install --no-cache -r ComfyUI_performance-report/requirements.txt
 fi
 
 echo "✅ Custom nodes and dependencies installed!"
