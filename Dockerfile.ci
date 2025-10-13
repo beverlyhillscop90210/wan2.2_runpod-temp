@@ -77,9 +77,6 @@ COPY runpod-worker-comfyui/handler.py /handler.py
 COPY scripts/download_models.sh /scripts/download_models.sh
 RUN chmod +x /scripts/download_models.sh
 
-# Copy default workflow
-COPY wan_upscale_wrapper_ngrok.json /etc/default_workflow.json
-
 # Copy runtime initialization script (installs ComfyUI, PyTorch, custom nodes at runtime)
 COPY scripts/runtime-init.sh /scripts/runtime-init.sh
 RUN chmod +x /scripts/runtime-init.sh

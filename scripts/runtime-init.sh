@@ -25,14 +25,6 @@ if [ -f "/etc/extra_model_paths.yaml" ]; then
     cp /etc/extra_model_paths.yaml /comfyui/extra_model_paths.yaml
 fi
 
-# Copy default workflow to ComfyUI
-if [ -f /etc/default_workflow.json ]; then
-    echo "📄 Setting up default workflow (wan_upscale_wrapper_ngrok.json)..."
-    mkdir -p /comfyui/user/default/workflows
-    cp /etc/default_workflow.json /comfyui/user/default/workflows/default.json
-    echo "✅ Default workflow configured - will auto-load on ComfyUI startup"
-fi
-
 echo "🔥 Installing PyTorch with CUDA 12.8 support..."
 pip install --no-cache-dir --upgrade \
     torch \
