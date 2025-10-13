@@ -183,7 +183,7 @@ cd SageAttention
 # Compile with output redirected to log file (Option A)
 echo "⚙️  Compiling CUDA kernels (parallel build with 32 jobs)..."
 EXT_PARALLEL=4 NVCC_APPEND_FLAGS="--threads 8" MAX_JOBS=32 \
-    python setup.py install > /tmp/sageattention_build.log 2>&1
+    pip install . > /tmp/sageattention_build.log 2>&1
 
 if [ $? -eq 0 ]; then
     echo "✅ SageAttention2++ build complete!"
