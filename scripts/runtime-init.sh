@@ -161,45 +161,71 @@ fi
 echo "✅ Custom nodes and dependencies installed!"
 
 echo "==================================================================="
-echo "⚡ SageAttention2++ Build Starting"
+echo "⚡ SageAttention2++ Installation Starting"
 echo "==================================================================="
-echo "📦 Installing SageAttention dependencies..."
-uv pip install --no-cache \
-    wheel \
-    setuptools \
-    packaging \
-    ninja \
-    triton 2>&1 | grep -E "(Successfully installed|ERROR|error)" || true
-
-echo ""
-echo "🚀 Building SageAttention2++ from source..."
-echo "⏳ This may take 5-10 minutes - output logged to /tmp/sageattention_build.log"
+echo "📦 Installing SageAttention dependencies (triton, packaging)..."
 echo ""
 
-cd /tmp
-git clone https://github.com/thu-ml/SageAttention.git > /dev/null 2>&1
-cd SageAttention
+# SageAttention REQUIRES triton to work properly!
+# Without triton, SageAttention will fail silently and output noise
+echo "🔧 Installing triton (required for SageAttention)..."
+uv pip install --no-cache triton packaging
 
-# Compile with output redirected to log file (Option A)
-echo "⚙️  Compiling CUDA kernels (parallel build with 32 jobs)..."
-EXT_PARALLEL=4 NVCC_APPEND_FLAGS="--threads 8" MAX_JOBS=32 \
-    python setup.py install > /tmp/sageattention_build.log 2>&1
+echo ""
+echo "📦 Installing prebuilt SageAttention wheel for Python 3.12 (Linux x86_64)..."
+echo ""
+
+# Install the prebuilt wheel from HuggingFace (Kijai's precompiled wheels)
+# This avoids compilation issues and works on all CUDA versions
+SAGEATTENTION_WHEEL_URL="https://huggingface.co/Kijai/PrecompiledWheels/resolve/main/sageattention-2.2.0-cp312-cp312-linux_x86_64.whl"
+
+echo "🚀 Downloading and installing SageAttention from prebuilt wheel..."
+echo "   URL: $SAGEATTENTION_WHEEL_URL"
+echo ""
+
+uv pip install --no-cache "$SAGEATTENTION_WHEEL_URL"
 
 if [ $? -eq 0 ]; then
-    echo "✅ SageAttention2++ build complete!"
-    echo "📄 Full build log available at: /tmp/sageattention_build.log"
+    echo ""
+    echo "✅ SageAttention2++ wheel installed successfully!"
+    echo "   Using prebuilt wheel - no compilation needed!"
 else
-    echo "❌ SageAttention2++ build failed! Check log at: /tmp/sageattention_build.log"
-    tail -n 50 /tmp/sageattention_build.log
+    echo ""
+    echo "❌ SageAttention2++ installation failed!"
+    echo "   Attempted to install from: $SAGEATTENTION_WHEEL_URL"
+    exit 1
+fi
+
+# Verify SageAttention is importable and triton is working
+echo ""
+echo "🧪 Verifying SageAttention installation..."
+python -c "
+import sys
+try:
+    import triton
+    print(f'  ✅ Triton {triton.__version__} - OK')
+except ImportError as e:
+    print(f'  ❌ Triton import failed: {e}')
+    sys.exit(1)
+
+try:
+    from sageattention import sageattn
+    print(f'  ✅ SageAttention - OK')
+except ImportError as e:
+    print(f'  ❌ SageAttention import failed: {e}')
+    sys.exit(1)
+
+print('  ✅ All SageAttention dependencies verified!')
+"
+
+if [ $? -ne 0 ]; then
+    echo "❌ SageAttention verification failed!"
+    echo "   ComfyUI will not work properly with --use-sage-attention"
     exit 1
 fi
 
 echo "==================================================================="
 echo ""
-
-# Clean up build artifacts
-cd /
-rm -rf /tmp/SageAttention
 
 echo "📓 Installing JupyterLab with full functionality..."
 uv pip install --no-cache \
