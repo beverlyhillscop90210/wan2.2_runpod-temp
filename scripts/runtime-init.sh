@@ -45,9 +45,18 @@ if [ ! -d "ComfyUI-Manager" ]; then
     git clone https://github.com/ltdrdata/ComfyUI-Manager.git
 fi
 
+# Install ComfyUI-Manager dependencies
+echo "📦 Installing ComfyUI-Manager dependencies..."
+if [ -f "ComfyUI-Manager/requirements.txt" ]; then
+    pip install -r ComfyUI-Manager/requirements.txt
+fi
+
 # Configure ComfyUI-Manager with security_level=weak to bypass version checks
 # This prevents the annoying "ComfyUI version is outdated" security block message
 echo "⚙️  Configuring ComfyUI-Manager (security_level=weak)..."
+
+# Create config in multiple locations to ensure it works
+# Location 1: /comfyui/user/__manager (standard location)
 MANAGER_CONFIG_DIR="/comfyui/user/__manager"
 mkdir -p "$MANAGER_CONFIG_DIR"
 cat > "$MANAGER_CONFIG_DIR/config.ini" << 'MANAGEREOF'
@@ -55,6 +64,22 @@ cat > "$MANAGER_CONFIG_DIR/config.ini" << 'MANAGEREOF'
 security_level = weak
 MANAGEREOF
 echo "   ✅ ComfyUI-Manager config created at $MANAGER_CONFIG_DIR/config.ini"
+
+# Location 2: Inside ComfyUI-Manager custom node directory
+MANAGER_NODE_CONFIG="/comfyui/custom_nodes/ComfyUI-Manager/config.ini"
+cat > "$MANAGER_NODE_CONFIG" << 'MANAGEREOF'
+[default]
+security_level = weak
+MANAGEREOF
+echo "   ✅ ComfyUI-Manager config also created at $MANAGER_NODE_CONFIG"
+
+# Location 3: ComfyUI root config directory
+mkdir -p "/comfyui/user/default"
+cat > "/comfyui/user/default/comfy-manager.ini" << 'MANAGEREOF'
+[default]
+security_level = weak
+MANAGEREOF
+echo "   ✅ ComfyUI-Manager config also created at /comfyui/user/default/comfy-manager.ini"
 
 # Install WAN Video Wrapper
 if [ ! -d "ComfyUI-WanVideoWrapper" ]; then
