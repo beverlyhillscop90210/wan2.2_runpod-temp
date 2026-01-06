@@ -92,8 +92,12 @@ FROM base AS custom_nodes
 WORKDIR /comfyui/custom_nodes
 
 # Install ComfyUI Manager (remove if exists to ensure fresh clone)
+# Using v3.37.1 which is compatible with ComfyUI v0.3.55
+# NOTE: The "FETCH ComfyRegistry Data" messages happen at runtime when ComfyUI starts,
+# not during Docker build. This is normal behavior - ComfyUI-Manager fetches node registry
+# data to show available nodes. This only takes a few seconds and is cached.
 RUN rm -rf ComfyUI-Manager && \
-    git clone https://github.com/ltdrdata/ComfyUI-Manager.git
+    git clone --branch 3.37.1 --depth 1 https://github.com/Comfy-Org/ComfyUI-Manager.git
 
 # Install ComfyUI Custom Scripts (remove if exists to ensure fresh clone)
 RUN rm -rf ComfyUI-Custom-Scripts && \
