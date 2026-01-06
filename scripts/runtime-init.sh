@@ -19,7 +19,9 @@ fi
 if [ "$ALREADY_INITIALIZED" = false ]; then
     echo "📦 Installing ComfyUI ${COMFYUI_VERSION:-v0.3.55}..."
     cd /
-    /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION:-v0.3.55}" --nvidia
+    # COMFY_SKIP_FETCH_REGISTRY=1 prevents the slow "FETCH ComfyRegistry Data" during init
+    # The registry fetch will happen when ComfyUI actually starts
+    COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION:-v0.3.55}" --nvidia
 fi
 
 # Copy extra_model_paths.yaml for network volume support
