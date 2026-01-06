@@ -104,8 +104,14 @@ RUN rm -rf ComfyUI-WanVideoWrapper && \
     git clone https://github.com/kijai/ComfyUI-WanVideoWrapper.git
 
 # Install ComfyUI-MatAnyone (remove if exists to ensure fresh clone)
+# Using --depth 1 for faster clone and explicitly checking out all files
 RUN rm -rf ComfyUI-MatAnyone && \
-    git clone https://github.com/FuouM/ComfyUI-MatAnyone.git
+    git clone --recursive https://github.com/FuouM/ComfyUI-MatAnyone.git && \
+    cd ComfyUI-MatAnyone && \
+    ls -la && \
+    ls -la src/ && \
+    ls -la src/core/ && \
+    ls -la src/model/
 
 # Install WAN Video Wrapper dependencies and clean up
 RUN uv pip install --no-cache \
