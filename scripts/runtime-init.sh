@@ -384,6 +384,17 @@ fi
 
 echo "✅ Custom nodes and dependencies installed!"
 
+# ============================================================================
+# GPU_TYPE Configuration - Set in RunPod Environment Variables
+# ============================================================================
+# GPU_TYPE=H200    - Build SageAttention from source with SM90 kernels (Hopper)
+# GPU_TYPE=H100    - Build SageAttention from source with SM90 kernels (Hopper)
+# GPU_TYPE=5090    - Use prebuilt wheel (Ada Lovelace/Blackwell consumer)
+# GPU_TYPE=6000    - Use prebuilt wheel (RTX Pro 6000 Ada)
+# GPU_TYPE=auto    - Auto-detect from nvidia-smi (default)
+# ============================================================================
+: "${GPU_TYPE:=auto}"
+
 echo "==================================================================="
 echo "⚡ SageAttention2++ Installation Starting"
 echo "==================================================================="
@@ -399,67 +410,263 @@ echo "📦 Installing Triton 3.3.0 from prebuilt wheel (required for SageAttenti
 echo "   URL: $TRITON_WHEEL_URL"
 uv pip install --no-cache packaging "$TRITON_WHEEL_URL"
 
-echo ""
-echo "==================================================================="
-echo "🚀 Building SageAttention from source for GPU architecture..."
-echo "==================================================================="
-echo "⚠️  Prebuilt wheels don't include SM90 kernels for H200/Hopper GPUs"
-echo "   Building from source to compile CUDA kernels for this GPU..."
-echo ""
-
-# Install build dependencies
-echo "📦 Installing build dependencies (wheel, setuptools, ninja)..."
-uv pip install --no-cache wheel setuptools ninja
-
-# Clone and build SageAttention from source
-# This ensures SM90 kernels are compiled for H200 GPUs (compute capability 9.0)
-cd /tmp
-if [ -d "SageAttention" ]; then
-    rm -rf SageAttention
-fi
-
-echo "📥 Cloning SageAttention repository..."
-git clone https://github.com/thu-ml/SageAttention.git
-cd SageAttention
-
-echo ""
-echo "🔨 Compiling CUDA kernels with parallel build..."
-echo "   This may take 3-5 minutes depending on GPU..."
-echo "-------------------------------------------------------------------"
-
-# Build with parallel compilation for speed
-# CRITICAL: Explicitly set TORCH_CUDA_ARCH_LIST to include SM90 for H200/Hopper GPUs
-# Without this, the build may not compile SM90 kernels even when running on H200
-export TORCH_CUDA_ARCH_LIST="9.0"
-export EXT_PARALLEL=4
-export NVCC_APPEND_FLAGS="--threads 8"
-export MAX_JOBS=32
-
-# Use --no-build-isolation to use already-installed torch/triton for CUDA detection
-pip install . --no-cache-dir --no-build-isolation
-
-BUILD_RESULT=$?
-
-# Clean up build artifacts
-cd /
-rm -rf /tmp/SageAttention
-
-if [ $BUILD_RESULT -eq 0 ]; then
-    echo "-------------------------------------------------------------------"
+# Auto-detect GPU type if not specified
+if [ "$GPU_TYPE" = "auto" ]; then
     echo ""
-    echo "✅ SageAttention2++ built successfully from source!"
-    echo "   SM90 kernels compiled for this GPU architecture"
+    echo "🔍 Auto-detecting GPU type..."
+    DETECTED_GPU=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -n1)
+
+    if [ -z "$DETECTED_GPU" ]; then
+        echo "   ❌ nvidia-smi failed or no GPU detected!"
+        echo "   Defaulting to prebuilt wheel..."
+        GPU_TYPE="PREBUILT"
+    else
+        echo "   Detected: '$DETECTED_GPU'"
+
+        # nvidia-smi naming conventions (case-insensitive matching):
+        # - Hopper:    "NVIDIA H200", "NVIDIA H100"
+        # - Blackwell: "NVIDIA RTX PRO 6000 Blackwell", "NVIDIA GeForce RTX 5090", "NVIDIA B200"
+        # - Ada:       "NVIDIA RTX 6000 Ada Generation", "NVIDIA GeForce RTX 4090"
+        # - Ampere:    "NVIDIA A100", "NVIDIA GeForce RTX 3090"
+
+        # Convert to uppercase for consistent matching
+        DETECTED_GPU_UPPER=$(echo "$DETECTED_GPU" | tr '[:lower:]' '[:upper:]')
+
+        # Detection order: Most specific patterns first
+        # 1. Hopper datacenter (H200, H100) - needs source build for SM90
+        if echo "$DETECTED_GPU_UPPER" | grep -qE "H200|H100"; then
+            GPU_TYPE="H200"
+            echo "   → Hopper datacenter GPU (H200/H100) - will build from source"
+
+        # 2. RTX PRO 6000 Blackwell - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX PRO 6000|RTX PRO 5000"; then
+            GPU_TYPE="6000"
+            echo "   → RTX PRO Blackwell workstation GPU - will use prebuilt wheel"
+
+        # 3. GeForce RTX 50-series (Blackwell consumer) - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX 5090|RTX 5080|RTX 5070|RTX 5060"; then
+            GPU_TYPE="5090"
+            echo "   → GeForce RTX 50-series (Blackwell) - will use prebuilt wheel"
+
+        # 4. Blackwell datacenter (B200, B100, GB200) - needs source build for SM100
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "B200|B100|GB200"; then
+            GPU_TYPE="B200"
+            echo "   → Blackwell datacenter GPU (B200/GB200) - will build from source"
+
+        # 5. RTX 6000 Ada - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX 6000|RTX 5000 ADA"; then
+            GPU_TYPE="6000"
+            echo "   → RTX Ada workstation GPU - will use prebuilt wheel"
+
+        # 6. GeForce RTX 40-series (Ada consumer) - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX 4090|RTX 4080|RTX 4070|RTX 4060"; then
+            GPU_TYPE="4090"
+            echo "   → GeForce RTX 40-series (Ada) - will use prebuilt wheel"
+
+        # 7. Ampere datacenter (A100, A6000) - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "A100|A6000|A5000|A4000|A40|A30|A10"; then
+            GPU_TYPE="A100"
+            echo "   → Ampere datacenter/pro GPU - will use prebuilt wheel"
+
+        # 8. GeForce RTX 30-series (Ampere consumer) - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX 3090|RTX 3080|RTX 3070|RTX 3060"; then
+            GPU_TYPE="3090"
+            echo "   → GeForce RTX 30-series (Ampere) - will use prebuilt wheel"
+
+        # 9. L40, L4 (Ada datacenter) - uses prebuilt wheel
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "L40|L4"; then
+            GPU_TYPE="L40"
+            echo "   → Ada datacenter GPU (L40/L4) - will use prebuilt wheel"
+
+        # 10. Unknown - default to prebuilt wheel
+        else
+            GPU_TYPE="PREBUILT"
+            echo "   → Unknown GPU type, defaulting to prebuilt wheel"
+        fi
+    fi
 else
     echo ""
-    echo "❌ SageAttention2++ build failed!"
-    echo "   Check GPU availability and CUDA toolkit"
-    exit 1
+    echo "📋 GPU_TYPE set explicitly via environment variable: $GPU_TYPE"
 fi
 
-# Verify SageAttention is importable, triton is working, AND SM90 kernels are available
+echo "   Final GPU_TYPE=$GPU_TYPE"
+
+# Determine installation method based on GPU type
+case "$GPU_TYPE" in
+    H200|H100|h200|h100)
+        # Build from source for Hopper GPUs (SM90)
+        echo ""
+        echo "==================================================================="
+        echo "🚀 Building SageAttention from source for Hopper (SM90)..."
+        echo "==================================================================="
+        echo "⚠️  Prebuilt wheels don't include SM90 kernels for H200/H100 GPUs"
+        echo "   Building from source to compile CUDA kernels for this GPU..."
+        echo ""
+
+        # Install build dependencies
+        echo "📦 Installing build dependencies (wheel, setuptools, ninja)..."
+        uv pip install --no-cache wheel setuptools ninja
+
+        # Clone and build SageAttention from source
+        cd /tmp
+        if [ -d "SageAttention" ]; then
+            rm -rf SageAttention
+        fi
+
+        echo "📥 Cloning SageAttention repository..."
+        git clone https://github.com/thu-ml/SageAttention.git
+        cd SageAttention
+
+        echo ""
+        echo "🔨 Compiling CUDA kernels with parallel build..."
+        echo "   This may take 3-5 minutes depending on GPU..."
+        echo "-------------------------------------------------------------------"
+
+        # Build with parallel compilation for speed
+        # CRITICAL: Explicitly set TORCH_CUDA_ARCH_LIST to include SM90 for H200/Hopper GPUs
+        export TORCH_CUDA_ARCH_LIST="9.0"
+        export EXT_PARALLEL=4
+        export NVCC_APPEND_FLAGS="--threads 8"
+        export MAX_JOBS=32
+
+        # Use --no-build-isolation to use already-installed torch/triton for CUDA detection
+        pip install . --no-cache-dir --no-build-isolation
+
+        BUILD_RESULT=$?
+
+        # Clean up build artifacts
+        cd /
+        rm -rf /tmp/SageAttention
+
+        if [ $BUILD_RESULT -eq 0 ]; then
+            echo "-------------------------------------------------------------------"
+            echo ""
+            echo "✅ SageAttention2++ built successfully from source!"
+            echo "   SM90 kernels compiled for Hopper architecture"
+            SAGE_VERIFY_SM90=true
+        else
+            echo ""
+            echo "❌ SageAttention2++ build failed!"
+            echo "   Check GPU availability and CUDA toolkit"
+            exit 1
+        fi
+        ;;
+
+    B200|B100|GB200|b200|b100|gb200)
+        # Build from source for Blackwell datacenter GPUs (SM100)
+        echo ""
+        echo "==================================================================="
+        echo "🚀 Building SageAttention from source for Blackwell (SM100)..."
+        echo "==================================================================="
+        echo "⚠️  Prebuilt wheels don't include SM100 kernels for B200/GB200 GPUs"
+        echo "   Building from source to compile CUDA kernels for this GPU..."
+        echo ""
+
+        # Install build dependencies
+        echo "📦 Installing build dependencies (wheel, setuptools, ninja)..."
+        uv pip install --no-cache wheel setuptools ninja
+
+        # Clone and build SageAttention from source
+        cd /tmp
+        if [ -d "SageAttention" ]; then
+            rm -rf SageAttention
+        fi
+
+        echo "📥 Cloning SageAttention repository..."
+        git clone https://github.com/thu-ml/SageAttention.git
+        cd SageAttention
+
+        echo ""
+        echo "🔨 Compiling CUDA kernels with parallel build..."
+        echo "   This may take 3-5 minutes depending on GPU..."
+        echo "-------------------------------------------------------------------"
+
+        # Build with parallel compilation for speed
+        # CRITICAL: Explicitly set TORCH_CUDA_ARCH_LIST to include SM100 for Blackwell GPUs
+        export TORCH_CUDA_ARCH_LIST="10.0"
+        export EXT_PARALLEL=4
+        export NVCC_APPEND_FLAGS="--threads 8"
+        export MAX_JOBS=32
+
+        # Use --no-build-isolation to use already-installed torch/triton for CUDA detection
+        pip install . --no-cache-dir --no-build-isolation
+
+        BUILD_RESULT=$?
+
+        # Clean up build artifacts
+        cd /
+        rm -rf /tmp/SageAttention
+
+        if [ $BUILD_RESULT -eq 0 ]; then
+            echo "-------------------------------------------------------------------"
+            echo ""
+            echo "✅ SageAttention2++ built successfully from source!"
+            echo "   SM100 kernels compiled for Blackwell architecture"
+            SAGE_VERIFY_SM90=false
+        else
+            echo ""
+            echo "❌ SageAttention2++ build failed!"
+            echo "   Check GPU availability and CUDA toolkit"
+            exit 1
+        fi
+        ;;
+
+    5090|5080|5070|5060|6000|4090|4080|4070|4060|A100|A6000|A5000|A4000|A40|A30|A10|3090|3080|3070|3060|L40|L4|PREBUILT)
+        # Use prebuilt wheel for Ada Lovelace / Ampere / Blackwell consumer GPUs
+        echo ""
+        echo "==================================================================="
+        echo "📦 Installing SageAttention from prebuilt wheel..."
+        echo "==================================================================="
+        echo "   Using Kijai's prebuilt wheel for $GPU_TYPE GPU"
+        echo ""
+
+        SAGE_WHEEL_URL="https://huggingface.co/Kijai/PrecompiledWheels/resolve/main/sageattention-2.2.0-cp312-cp312-linux_x86_64.whl"
+        echo "📥 Downloading: $SAGE_WHEEL_URL"
+        uv pip install --no-cache "$SAGE_WHEEL_URL"
+
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo "✅ SageAttention2++ installed from prebuilt wheel!"
+        else
+            echo ""
+            echo "❌ SageAttention2++ wheel installation failed!"
+            exit 1
+        fi
+        SAGE_VERIFY_SM90=false
+        ;;
+
+    *)
+        # Unknown GPU type - try prebuilt wheel as fallback
+        echo ""
+        echo "==================================================================="
+        echo "⚠️  Unknown GPU_TYPE: $GPU_TYPE"
+        echo "==================================================================="
+        echo "   Falling back to prebuilt wheel..."
+        echo ""
+
+        SAGE_WHEEL_URL="https://huggingface.co/Kijai/PrecompiledWheels/resolve/main/sageattention-2.2.0-cp312-cp312-linux_x86_64.whl"
+        echo "📥 Downloading: $SAGE_WHEEL_URL"
+        uv pip install --no-cache "$SAGE_WHEEL_URL"
+
+        if [ $? -eq 0 ]; then
+            echo ""
+            echo "✅ SageAttention2++ installed from prebuilt wheel!"
+        else
+            echo ""
+            echo "❌ SageAttention2++ wheel installation failed!"
+            exit 1
+        fi
+        SAGE_VERIFY_SM90=false
+        ;;
+esac
+
+# Verify SageAttention is importable and triton is working
 echo ""
 echo "🧪 Verifying SageAttention installation..."
-python -c "
+
+if [ "$SAGE_VERIFY_SM90" = true ]; then
+    # Verify with SM90 check for Hopper GPUs
+    python -c "
 import sys
 try:
     import triton
@@ -490,6 +697,27 @@ except ImportError:
 
 print('  ✅ All SageAttention dependencies verified!')
 "
+else
+    # Verify without SM90 check for Ada/Blackwell
+    python -c "
+import sys
+try:
+    import triton
+    print(f'  ✅ Triton {triton.__version__} - OK')
+except ImportError as e:
+    print(f'  ❌ Triton import failed: {e}')
+    sys.exit(1)
+
+try:
+    from sageattention import sageattn
+    print(f'  ✅ SageAttention - OK')
+except ImportError as e:
+    print(f'  ❌ SageAttention import failed: {e}')
+    sys.exit(1)
+
+print('  ✅ All SageAttention dependencies verified!')
+"
+fi
 
 if [ $? -ne 0 ]; then
     echo "❌ SageAttention verification failed!"

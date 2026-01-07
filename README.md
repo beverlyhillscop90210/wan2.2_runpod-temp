@@ -103,6 +103,7 @@ docker-compose -f docker-compose.wan22.yml up -d
    - **Expose HTTP Ports:** `8188,8189` (CRITICAL!)
    - Environment Variables (optional):
      - `COMFY_LOG_LEVEL=DEBUG`
+     - `GPU_TYPE=auto` (see GPU Types below)
 
 3. **Deploy Compute Pod**
    - Go to [RunPod Pods](https://www.runpod.io/console/pods)
@@ -204,6 +205,21 @@ All models are sourced from:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `COMFY_LOG_LEVEL` | `DEBUG` | ComfyUI logging level (DEBUG, INFO, WARNING, ERROR) |
+| `GPU_TYPE` | `auto` | GPU type for SageAttention build method (see below) |
+| `COMFYUI_USE_LATEST` | `false` | Use latest ComfyUI instead of pinned v0.3.55 |
+
+### GPU_TYPE Values
+
+| Value | Description | SageAttention Install Method |
+|-------|-------------|------------------------------|
+| `auto` | Auto-detect GPU from nvidia-smi (default) | Automatic |
+| `H200` | NVIDIA H200 (Hopper) | Build from source with SM90 kernels |
+| `H100` | NVIDIA H100 (Hopper) | Build from source with SM90 kernels |
+| `5090` | NVIDIA RTX 5090 (Blackwell) | Prebuilt wheel |
+| `6000` | NVIDIA RTX Pro 6000 (Ada) | Prebuilt wheel |
+| `4090` | NVIDIA RTX 4090 (Ada Lovelace) | Prebuilt wheel |
+
+**Note:** H200/H100 GPUs require building SageAttention from source because prebuilt wheels don't include SM90 kernels. RTX 5090/6000/40-series can use the faster prebuilt wheel installation.
 
 ## 🔄 CI/CD Automation
 
