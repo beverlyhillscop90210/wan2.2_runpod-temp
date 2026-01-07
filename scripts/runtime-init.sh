@@ -370,7 +370,8 @@ export EXT_PARALLEL=4
 export NVCC_APPEND_FLAGS="--threads 8"
 export MAX_JOBS=32
 
-pip install . --no-cache-dir
+# Use --no-build-isolation to use already-installed torch/triton for CUDA detection
+pip install . --no-cache-dir --no-build-isolation
 
 BUILD_RESULT=$?
 
