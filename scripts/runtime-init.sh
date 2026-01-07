@@ -9,6 +9,14 @@ echo "==================================================================="
 echo "WAN 2.2 Runtime Initialization"
 echo "==================================================================="
 
+# ============================================================================
+# COMFYUI VERSION FLAG - Set in RunPod Environment Variables
+# ============================================================================
+# COMFYUI_USE_LATEST=true   - Install latest ComfyUI version (bleeding edge)
+# COMFYUI_USE_LATEST=false  - Use pinned stable version v0.3.55 (default)
+# ============================================================================
+: "${COMFYUI_USE_LATEST:=false}"
+
 # Check if already initialized (for persistent storage)
 ALREADY_INITIALIZED=false
 if [ -f "/comfyui/.initialized" ]; then
@@ -17,11 +25,18 @@ if [ -f "/comfyui/.initialized" ]; then
 fi
 
 if [ "$ALREADY_INITIALIZED" = false ]; then
-    echo "📦 Installing ComfyUI ${COMFYUI_VERSION:-v0.3.55}..."
     cd /
     # COMFY_SKIP_FETCH_REGISTRY=1 prevents the slow "FETCH ComfyRegistry Data" during init
     # The registry fetch will happen when ComfyUI actually starts
-    COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION:-v0.3.55}" --nvidia
+
+    if [ "$COMFYUI_USE_LATEST" = "true" ]; then
+        echo "📦 Installing ComfyUI (LATEST version)..."
+        echo "   ⚠️  Note: Latest version may have compatibility issues with some nodes"
+        COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --nvidia
+    else
+        echo "📦 Installing ComfyUI ${COMFYUI_VERSION:-v0.3.55} (stable)..."
+        COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION:-v0.3.55}" --nvidia
+    fi
 fi
 
 # Copy extra_model_paths.yaml for network volume support
