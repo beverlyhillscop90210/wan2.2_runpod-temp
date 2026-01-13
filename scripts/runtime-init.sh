@@ -13,7 +13,7 @@ echo "==================================================================="
 # COMFYUI VERSION FLAG - Set in RunPod Environment Variables
 # ============================================================================
 # COMFYUI_USE_LATEST=true   - Install latest ComfyUI version (bleeding edge)
-# COMFYUI_USE_LATEST=false  - Use pinned stable version v0.3.55 (default)
+# COMFYUI_USE_LATEST=false  - Use pinned stable version v0.3.56 (default)
 # ============================================================================
 : "${COMFYUI_USE_LATEST:=false}"
 
@@ -34,8 +34,8 @@ if [ "$ALREADY_INITIALIZED" = false ]; then
         echo "   ⚠️  Note: Latest version may have compatibility issues with some nodes"
         COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --nvidia
     else
-        echo "📦 Installing ComfyUI ${COMFYUI_VERSION:-v0.3.55} (stable)..."
-        COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION:-v0.3.55}" --nvidia
+        echo "📦 Installing ComfyUI ${COMFYUI_VERSION:-v0.3.56} (stable)..."
+        COMFY_SKIP_FETCH_REGISTRY=1 /usr/bin/yes | comfy --workspace /comfyui install --version "${COMFYUI_VERSION:-v0.3.56}" --nvidia
     fi
 fi
 
@@ -72,7 +72,7 @@ export HF_HUB_ENABLE_HF_TRANSFER=1
 # ============================================================================
 # Version matching is CRITICAL to prevent execution.py patching errors:
 # - COMFYUI_USE_LATEST=true  → Use latest ComfyUI-Manager (for latest ComfyUI)
-# - COMFYUI_USE_LATEST=false → Use v3.37.1 (for stable ComfyUI v0.3.55)
+# - COMFYUI_USE_LATEST=false → Use v3.37.1 (for stable ComfyUI v0.3.56)
 #
 # Mismatched versions cause: "patched_execute() takes X positional arguments but Y were given"
 # This section runs EVERY startup to fix any incorrect Manager versions.
@@ -85,7 +85,7 @@ cd /comfyui/custom_nodes
 # ComfyUI-Manager Version Selection
 # ============================================================================
 # When COMFYUI_USE_LATEST=true: Use latest ComfyUI-Manager (compatible with latest ComfyUI)
-# When COMFYUI_USE_LATEST=false: Use v3.37.1 (last version compatible with v0.3.55)
+# When COMFYUI_USE_LATEST=false: Use v3.37.1 (last version compatible with v0.3.56)
 #
 # CRITICAL: ComfyUI-Manager v3.38+ patches execution.py with updated function signatures.
 # Using the wrong version causes: "patched_execute() takes X positional arguments but Y were given"
@@ -121,7 +121,7 @@ if [ "$COMFYUI_USE_LATEST" = "true" ]; then
         pip install -r ComfyUI-Manager/requirements.txt
     fi
 else
-    # Stable ComfyUI v0.3.55 needs pinned ComfyUI-Manager v3.37.1
+    # Stable ComfyUI v0.3.56 needs pinned ComfyUI-Manager v3.37.1
     MANAGER_VERSION="3.37.1"
     MANAGER_NEEDS_INSTALL=false
 
@@ -182,37 +182,12 @@ security_level = weak
 MANAGEREOF
 echo "   ✅ ComfyUI-Manager config also created at /comfyui/user/default/ComfyUI-Manager/config.ini"
 
-# Check if essential components are installed (they may be missing if venv was reset)
-JUPYTER_INSTALLED=false
-SAGEATTENTION_INSTALLED=false
-
-if python -c "import jupyterlab" 2>/dev/null; then
-    JUPYTER_INSTALLED=true
-fi
-
-if python -c "from sageattention import sageattn" 2>/dev/null; then
-    SAGEATTENTION_INSTALLED=true
-fi
-
-# Skip the rest ONLY if already initialized AND all essential components are present
-if [ "$ALREADY_INITIALIZED" = true ] && [ "$JUPYTER_INSTALLED" = true ] && [ "$SAGEATTENTION_INSTALLED" = true ]; then
-    echo "==================================================================="
-    echo "✅ ComfyUI-Manager verified/fixed - all components present"
-    echo "   JupyterLab: ✅ installed"
-    echo "   SageAttention: ✅ installed"
-    echo "   Skipping remaining setup"
-    echo "==================================================================="
-    exit 0
-fi
-
-# If we get here with ALREADY_INITIALIZED=true, some components are missing
+# Skip the rest if already initialized
 if [ "$ALREADY_INITIALIZED" = true ]; then
     echo "==================================================================="
-    echo "⚠️  Initialization marker found but some components missing!"
-    echo "   JupyterLab: $([ "$JUPYTER_INSTALLED" = true ] && echo "✅" || echo "❌ NOT INSTALLED")"
-    echo "   SageAttention: $([ "$SAGEATTENTION_INSTALLED" = true ] && echo "✅" || echo "❌ NOT INSTALLED")"
-    echo "   Continuing with installation of missing components..."
+    echo "✅ ComfyUI-Manager verified/fixed - skipping remaining setup"
     echo "==================================================================="
+    exit 0
 fi
 
 echo "🧩 Installing other custom nodes..."
@@ -420,26 +395,20 @@ echo "✅ Custom nodes and dependencies installed!"
 # ============================================================================
 : "${GPU_TYPE:=auto}"
 
-# Skip SageAttention installation if already installed (from previous run)
-if [ "$SAGEATTENTION_INSTALLED" = true ]; then
-    echo "==================================================================="
-    echo "⚡ SageAttention2++ Already Installed - Skipping"
-    echo "==================================================================="
-else
-    echo "==================================================================="
-    echo "⚡ SageAttention2++ Installation Starting"
-    echo "==================================================================="
-    echo "📦 Installing SageAttention dependencies..."
-    echo ""
+echo "==================================================================="
+echo "⚡ SageAttention2++ Installation Starting"
+echo "==================================================================="
+echo "📦 Installing SageAttention dependencies..."
+echo ""
 
-    # SageAttention REQUIRES triton to work properly!
-    # Without triton, SageAttention will fail silently and output noise
-    # Using prebuilt Triton wheel from Kijai for better compatibility with PyTorch 2.7
-    TRITON_WHEEL_URL="https://huggingface.co/Kijai/PrecompiledWheels/resolve/main/triton-3.3.0-cp312-cp312-linux_x86_64.whl"
+# SageAttention REQUIRES triton to work properly!
+# Without triton, SageAttention will fail silently and output noise
+# Using prebuilt Triton wheel from Kijai for better compatibility with PyTorch 2.7
+TRITON_WHEEL_URL="https://huggingface.co/Kijai/PrecompiledWheels/resolve/main/triton-3.3.0-cp312-cp312-linux_x86_64.whl"
 
-    echo "📦 Installing Triton 3.3.0 from prebuilt wheel (required for SageAttention)..."
-    echo "   URL: $TRITON_WHEEL_URL"
-    uv pip install --no-cache packaging "$TRITON_WHEEL_URL"
+echo "📦 Installing Triton 3.3.0 from prebuilt wheel (required for SageAttention)..."
+echo "   URL: $TRITON_WHEEL_URL"
+uv pip install --no-cache packaging "$TRITON_WHEEL_URL"
 
 # Auto-detect GPU type if not specified
 if [ "$GPU_TYPE" = "auto" ]; then
@@ -759,32 +728,25 @@ fi
 echo "==================================================================="
 echo ""
 
-fi  # End of SageAttention installation block (skipped if SAGEATTENTION_INSTALLED=true)
+echo "📓 Installing JupyterLab with full functionality..."
+uv pip install --no-cache \
+    jupyterlab \
+    ipykernel \
+    jupyter-server-terminals \
+    ipywidgets \
+    matplotlib \
+    pandas \
+    notebook
 
-# Skip JupyterLab installation if already installed (from previous run)
-if [ "$JUPYTER_INSTALLED" = true ]; then
-    echo "📓 JupyterLab Already Installed - Skipping package installation"
-else
-    echo "📓 Installing JupyterLab with full functionality..."
-    uv pip install --no-cache \
-        jupyterlab \
-        ipykernel \
-        jupyter-server-terminals \
-        ipywidgets \
-        matplotlib \
-        pandas \
-        notebook
+# Register Python kernel explicitly for JupyterLab
+echo "🔧 Registering Python kernel..."
+python -m ipykernel install --name="python3" --display-name="Python 3 (ipykernel)" --sys-prefix
 
-    # Register Python kernel explicitly for JupyterLab
-    echo "🔧 Registering Python kernel..."
-    python -m ipykernel install --name="python3" --display-name="Python 3 (ipykernel)" --sys-prefix
+# Verify kernel installation
+echo "✅ Installed kernels:"
+jupyter kernelspec list
 
-    # Verify kernel installation
-    echo "✅ Installed kernels:"
-    jupyter kernelspec list
-fi
-
-# ALWAYS create/update JupyterLab configuration (in case it was deleted or changed)
+# Create JupyterLab configuration
 echo "⚙️  Configuring JupyterLab..."
 mkdir -p /root/.jupyter
 cat > /root/.jupyter/jupyter_lab_config.py << 'EOF'

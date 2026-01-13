@@ -10,7 +10,7 @@
 FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04 AS base
 
 # Build arguments
-ARG COMFYUI_VERSION=v0.3.55
+ARG COMFYUI_VERSION=v0.3.56
 # Note: Using nightly builds for CUDA 12.8 support (stable version doesn't exist yet)
 
 # Environment variables
@@ -93,7 +93,7 @@ FROM base AS custom_nodes
 WORKDIR /comfyui/custom_nodes
 
 # Install ComfyUI Manager (remove if exists to ensure fresh clone)
-# Using v3.37.1 which is compatible with ComfyUI v0.3.55
+# Using v3.37.1 which is compatible with ComfyUI v0.3.56
 # NOTE: The "FETCH ComfyRegistry Data" messages happen at runtime when ComfyUI starts,
 # not during Docker build. This is normal behavior - ComfyUI-Manager fetches node registry
 # data to show available nodes. This only takes a few seconds and is cached.
@@ -251,10 +251,10 @@ CMD ["/start.sh"]
 
 # Labels
 LABEL maintainer="WAN 2.2 RunPod Compute Template"
-LABEL description="RunPod COMPUTE template for WAN 2.2 with CUDA 12.8, PyTorch nightly, ComfyUI v0.3.55, and JupyterLab. ComfyUI on port 8188, JupyterLab on port 8189."
+LABEL description="RunPod COMPUTE template for WAN 2.2 with CUDA 12.8, PyTorch nightly, ComfyUI v0.3.56, and JupyterLab. ComfyUI on port 8188, JupyterLab on port 8189."
 LABEL cuda.version="12.8.1"
 LABEL pytorch.version="nightly"
-LABEL comfyui.version="v0.3.55"
+LABEL comfyui.version="v0.3.56"
 LABEL wan.version="2.2"
 LABEL template.type="compute"
 LABEL ports.comfyui="8188"

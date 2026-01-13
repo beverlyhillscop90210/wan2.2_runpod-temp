@@ -123,7 +123,7 @@ fi
 
 ## Compatibility
 
-- **ComfyUI Version:** v0.3.55+
+- **ComfyUI Version:** v0.3.56+
 - **Python:** 3.10+
 - **CUDA:** 12.8.1
 - **PyTorch:** 2.8.0

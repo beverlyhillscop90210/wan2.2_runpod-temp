@@ -206,7 +206,7 @@ All models are sourced from:
 |----------|---------|-------------|
 | `COMFY_LOG_LEVEL` | `DEBUG` | ComfyUI logging level (DEBUG, INFO, WARNING, ERROR) |
 | `GPU_TYPE` | `auto` | GPU type for SageAttention build method (see below) |
-| `COMFYUI_USE_LATEST` | `false` | Use latest ComfyUI instead of pinned v0.3.55 |
+| `COMFYUI_USE_LATEST` | `false` | Use latest ComfyUI instead of pinned v0.3.56 |
 
 ### GPU_TYPE Values
 

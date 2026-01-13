@@ -175,7 +175,7 @@ The `wan_upscale_wrapper_ngrok.json` workflow includes:
 **Solutions:**
 1. Ensure all custom nodes are installed (they are in this template)
 2. Check that all required models are downloaded
-3. Verify ComfyUI version compatibility (v0.3.55+)
+3. Verify ComfyUI version compatibility (v0.3.56+)
 
 ### Workflow Modifications Not Saving
 

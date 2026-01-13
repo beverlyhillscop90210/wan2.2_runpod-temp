@@ -127,7 +127,7 @@ Your Docker image includes:
 3. Configure:
 
    **Template Settings:**
-   - **Template Name:** `WAN 2.2 ComfyUI v0.3.55 - Compute`
+   - **Template Name:** `WAN 2.2 ComfyUI v0.3.56 - Compute`
    - **Docker Image:** `ghcr.io/lum3on/wan22-runpod:latest` (PUBLIC)
    - **Container Disk:** `50 GB` (minimum)
    - **Expose HTTP Ports:** `8188,8189` ⚠️ **CRITICAL - Must expose both ports!**
@@ -200,7 +200,7 @@ Navigate to `/comfyui/models/` to verify all models are present.
 |-----------|------|---------|
 | Base Image | ~5 GB | CUDA 12.8.1 + Ubuntu 24.04 |
 | PyTorch | ~3 GB | PyTorch 2.8.0 with CUDA 12.8 |
-| ComfyUI | ~2 GB | v0.3.55 + custom nodes |
+| ComfyUI | ~2 GB | v0.3.56 + custom nodes |
 | Models | ~25 GB | All WAN 2.2 models + LoRAs + upscalers |
 | **Total** | **~35 GB** | Compressed image size |
 
