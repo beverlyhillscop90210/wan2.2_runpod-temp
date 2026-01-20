@@ -438,15 +438,15 @@ if [ "$GPU_TYPE" = "auto" ]; then
             GPU_TYPE="H200"
             echo "   → Hopper datacenter GPU (H200/H100) - will build from source"
 
-        # 2. RTX PRO 6000 Blackwell - uses prebuilt wheel
-        elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX PRO 6000|RTX PRO 5000"; then
-            GPU_TYPE="6000"
-            echo "   → RTX PRO Blackwell workstation GPU - will use prebuilt wheel"
+        # 2. RTX PRO 6000/5000 Blackwell - needs source build for SM120
+        elif echo "$DETECTED_GPU_UPPER" | grep -qE "(RTX PRO 6000|RTX PRO 5000).*BLACKWELL|BLACKWELL.*(RTX PRO 6000|RTX PRO 5000)"; then
+            GPU_TYPE="PRO_BLACKWELL"
+            echo "   → RTX PRO Blackwell workstation GPU - will build from source (SM120)"
 
-        # 3. GeForce RTX 50-series (Blackwell consumer) - uses prebuilt wheel
+        # 3. GeForce RTX 50-series (Blackwell consumer) - needs source build for SM120
         elif echo "$DETECTED_GPU_UPPER" | grep -qE "RTX 5090|RTX 5080|RTX 5070|RTX 5060"; then
-            GPU_TYPE="5090"
-            echo "   → GeForce RTX 50-series (Blackwell) - will use prebuilt wheel"
+            GPU_TYPE="RTX50"
+            echo "   → GeForce RTX 50-series (Blackwell) - will build from source (SM120)"
 
         # 4. Blackwell datacenter (B200, B100, GB200) - needs source build for SM100
         elif echo "$DETECTED_GPU_UPPER" | grep -qE "B200|B100|GB200"; then
@@ -611,8 +611,67 @@ case "$GPU_TYPE" in
         fi
         ;;
 
-    5090|5080|5070|5060|6000|4090|4080|4070|4060|A100|A6000|A5000|A4000|A40|A30|A10|3090|3080|3070|3060|L40|L4|PREBUILT)
-        # Use prebuilt wheel for Ada Lovelace / Ampere / Blackwell consumer GPUs
+    PRO_BLACKWELL|RTX50|pro_blackwell|rtx50)
+        # Build from source for Blackwell consumer/workstation GPUs (SM120)
+        echo ""
+        echo "==================================================================="
+        echo "🚀 Building SageAttention from source for Blackwell (SM120)..."
+        echo "==================================================================="
+        echo "⚠️  Prebuilt wheels don't include SM120 kernels for RTX 50-series/PRO Blackwell GPUs"
+        echo "   Building from source to compile CUDA kernels for this GPU..."
+        echo ""
+
+        # Install build dependencies
+        echo "📦 Installing build dependencies (wheel, setuptools, ninja)..."
+        uv pip install --no-cache wheel setuptools ninja
+
+        # Clone and build SageAttention from source
+        cd /tmp
+        if [ -d "SageAttention" ]; then
+            rm -rf SageAttention
+        fi
+
+        echo "📥 Cloning SageAttention repository..."
+        git clone https://github.com/thu-ml/SageAttention.git
+        cd SageAttention
+
+        echo ""
+        echo "🔨 Compiling CUDA kernels with parallel build..."
+        echo "   This may take 3-5 minutes depending on GPU..."
+        echo "-------------------------------------------------------------------"
+
+        # Build with parallel compilation for speed
+        # CRITICAL: Explicitly set TORCH_CUDA_ARCH_LIST to include SM120 for Blackwell GPUs
+        export TORCH_CUDA_ARCH_LIST="12.0"
+        export EXT_PARALLEL=4
+        export NVCC_APPEND_FLAGS="--threads 8"
+        export MAX_JOBS=32
+
+        # Use --no-build-isolation to use already-installed torch/triton for CUDA detection
+        pip install . --no-cache-dir --no-build-isolation
+
+        BUILD_RESULT=$?
+
+        # Clean up build artifacts
+        cd /
+        rm -rf /tmp/SageAttention
+
+        if [ $BUILD_RESULT -eq 0 ]; then
+            echo "-------------------------------------------------------------------"
+            echo ""
+            echo "✅ SageAttention2++ built successfully from source!"
+            echo "   SM120 kernels compiled for Blackwell architecture"
+            SAGE_VERIFY_SM90=false
+        else
+            echo ""
+            echo "❌ SageAttention2++ build failed!"
+            echo "   Check GPU availability and CUDA toolkit"
+            exit 1
+        fi
+        ;;
+
+    6000|4090|4080|4070|4060|A100|A6000|A5000|A4000|A40|A30|A10|3090|3080|3070|3060|L40|L4|PREBUILT)
+        # Use prebuilt wheel for Ada Lovelace / Ampere GPUs (NOT Blackwell!)
         echo ""
         echo "==================================================================="
         echo "📦 Installing SageAttention from prebuilt wheel..."

@@ -213,13 +213,15 @@ All models are sourced from:
 | Value | Description | SageAttention Install Method |
 |-------|-------------|------------------------------|
 | `auto` | Auto-detect GPU from nvidia-smi (default) | Automatic |
+| `PRO_BLACKWELL` | NVIDIA RTX PRO 6000/5000 Blackwell | Build from source with SM120 kernels |
+| `RTX50` | NVIDIA RTX 5090/5080/5070 (Blackwell) | Build from source with SM120 kernels |
+| `B200` | NVIDIA B200/GB200 (Blackwell datacenter) | Build from source with SM100 kernels |
 | `H200` | NVIDIA H200 (Hopper) | Build from source with SM90 kernels |
 | `H100` | NVIDIA H100 (Hopper) | Build from source with SM90 kernels |
-| `5090` | NVIDIA RTX 5090 (Blackwell) | Prebuilt wheel |
-| `6000` | NVIDIA RTX Pro 6000 (Ada) | Prebuilt wheel |
+| `6000` | NVIDIA RTX 6000 Ada | Prebuilt wheel |
 | `4090` | NVIDIA RTX 4090 (Ada Lovelace) | Prebuilt wheel |
 
-**Note:** H200/H100 GPUs require building SageAttention from source because prebuilt wheels don't include SM90 kernels. RTX 5090/6000/40-series can use the faster prebuilt wheel installation.
+**Note:** Blackwell GPUs (RTX 50-series, RTX PRO Blackwell, B200) require building SageAttention from source because prebuilt wheels don't include SM120/SM100 kernels. H200/H100 GPUs also require source builds for SM90 kernels. Ada/Ampere GPUs can use the faster prebuilt wheel installation.
 
 ## 🔄 CI/CD Automation
 

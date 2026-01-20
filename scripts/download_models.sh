@@ -394,6 +394,9 @@ if [ "$DOWNLOAD_WAN_CORE" = "true" ]; then
     echo "   ✅ WAN Core T2V models enabled"
     PHASE1_DOWNLOADS+=("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors $MODEL_DIR/diffusion_models/wan2.2_t2v_high_noise_14B_fp16.safetensors")
     PHASE1_DOWNLOADS+=("https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/resolve/main/split_files/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors $MODEL_DIR/diffusion_models/wan2.2_t2v_low_noise_14B_fp16.safetensors")
+    # Yogo-Wan LoRAs (bundled with WAN Core)
+    PHASE1_DOWNLOADS+=("https://huggingface.co/yo9otatara/F5/resolve/main/Yogo-Wan-V1_000014000.safetensors $MODEL_DIR/loras/Yogo-Wan-V1_000014000.safetensors")
+    PHASE1_DOWNLOADS+=("https://huggingface.co/yo9otatara/F5/resolve/main/Yogo-Wan-V1_000017000.safetensors $MODEL_DIR/loras/Yogo-Wan-V1_000017000.safetensors")
 else
     echo "   ⏭️  WAN Core T2V models SKIPPED (DOWNLOAD_WAN_CORE=false)"
 fi

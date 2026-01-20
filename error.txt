@@ -1,0 +1,518 @@
+# ComfyUI Error Report
+## Error Details
+- **Node ID:** 222
+- **Node Type:** WanVideoSampler
+- **Exception Type:** AssertionError
+- **Exception Message:** SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+
+## Stack Trace
+```
+  File "/comfyui/execution.py", line 496, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, hidden_inputs=hidden_inputs)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/execution.py", line 315, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, hidden_inputs=hidden_inputs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/execution.py", line 289, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+
+  File "/comfyui/execution.py", line 277, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 3667, in process
+    raise e
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 3126, in process
+    noise_pred_context, new_teacache = predict_with_cfg(
+                                       ^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 2714, in predict_with_cfg
+    raise e
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 2615, in predict_with_cfg
+    noise_pred_cond, cache_state_cond = transformer(
+                                        ^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 2165, in forward
+    x, x_ip = block(x, x_ip=x_ip, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 944, in forward
+    y = self.self_attn.forward(q, k, v, seq_lens)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 337, in forward
+    x = attention(q, k, v, k_lens=seq_lens, attention_mode=attention_mode)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/attention.py", line 203, in attention
+    return sageattn_func(q, k, v, tensor_layout="NHD").contiguous()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 838, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/attention.py", line 28, in sageattn_func
+    return sageattn(q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=is_causal, tensor_layout=tensor_layout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/sageattention/core.py", line 148, in sageattn
+    return sageattn_qk_int8_pv_fp8_cuda_sm90(q, k, v, tensor_layout=tensor_layout, is_causal=is_causal, sm_scale=sm_scale, return_lse=return_lse, pv_accum_dtype="fp32+fp32")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 838, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+
+  File "/opt/venv/lib/python3.12/site-packages/sageattention/core.py", line 858, in sageattn_qk_int8_pv_fp8_cuda_sm90
+    assert SM90_ENABLED, "SM90 kernel is not available. Make sure you GPUs with compute capability 9.0."
+           ^^^^^^^^^^^^
+
+```
+## System Information
+- **ComfyUI Version:** 0.3.55
+- **Arguments:** /comfyui/main.py --disable-auto-launch --disable-metadata --listen 0.0.0.0 --port 8188 --verbose DEBUG --log-stdout --use-sage-attention
+- **OS:** posix
+- **Python Version:** 3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]
+- **Embedded Python:** false
+- **PyTorch Version:** 2.7.1+cu128
+## Devices
+
+- **Name:** cuda:0 NVIDIA H200 : cudaMallocAsync
+  - **Type:** cuda
+  - **VRAM Total:** 150121545728
+  - **VRAM Free:** 149570977792
+  - **Torch VRAM Total:** 0
+  - **Torch VRAM Free:** 0
+
+## Logs
+```
+2026-01-07T12:44:18.800923 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.800951 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.800978 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801006 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801035 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801063 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801091 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801118 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801146 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801174 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801202 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801230 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801257 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801285 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801313 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801341 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801369 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801398 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801427 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801463 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801492 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801521 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801548 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801576 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801608 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801638 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801667 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.1.DenseReluDense.wo Linear(in_features=10240, out_features=4096, bias=False)
+2026-01-07T12:44:18.801696 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.1.DenseReluDense.wi_1 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801724 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.1.DenseReluDense.wi_0 Linear(in_features=4096, out_features=10240, bias=False)
+2026-01-07T12:44:18.801753 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801783 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801815 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801844 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801872 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801899 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801927 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801956 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.801984 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802012 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802040 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802075 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802103 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802132 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802160 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802188 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802215 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802242 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802272 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802301 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802328 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802357 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802385 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802412 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802440 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802476 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802504 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802532 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802564 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802596 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802631 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802665 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802695 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802729 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802759 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802795 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802824 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802857 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802890 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802922 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802954 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.802985 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803032 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803061 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803093 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803128 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803158 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803189 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803221 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803250 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803279 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803307 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803337 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803364 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803398 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803432 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803469 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803501 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803530 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803558 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803587 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803615 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803643 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803670 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803699 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803729 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803757 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803784 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803813 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803843 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803875 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803905 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803934 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803961 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.803988 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804016 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804042 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804071 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804098 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804127 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804153 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804181 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804206 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804232 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804259 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804284 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804317 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804346 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804377 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804407 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804437 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804470 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804500 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.0.SelfAttention.v Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804529 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.0.SelfAttention.q Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804557 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.0.SelfAttention.o Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804585 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.0.SelfAttention.k Linear(in_features=4096, out_features=4096, bias=False)
+2026-01-07T12:44:18.804622 - lowvram: loaded module regularly umt5xxl.transformer.encoder.final_layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804654 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804683 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804711 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804743 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804771 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804801 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804831 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804862 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804891 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804922 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804949 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.804983 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805012 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805044 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805073 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805106 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805133 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805163 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805191 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805220 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805249 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805280 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805307 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805339 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805367 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805398 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805425 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805459 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805489 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805521 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805549 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805582 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805611 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805642 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805671 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805703 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805729 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805760 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805787 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805817 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805841 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805871 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805898 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805931 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805963 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.805992 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.806022 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.1.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.806046 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.0.layer_norm T5LayerNorm()
+2026-01-07T12:44:18.806088 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.9.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806126 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.8.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806161 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.7.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806201 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.6.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806235 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.5.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806266 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.4.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806297 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.3.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806328 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.23.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806361 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.22.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806393 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.21.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806426 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.20.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806461 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.2.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806494 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.19.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806528 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.18.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806559 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.17.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806589 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.16.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806619 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.15.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806650 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.14.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806681 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.13.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806711 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.12.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806743 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.11.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806772 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.10.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806801 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.1.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:18.806832 - lowvram: loaded module regularly umt5xxl.transformer.encoder.block.0.layer.0.SelfAttention.relative_attention_bias Embedding(32, 64)
+2026-01-07T12:44:22.518484 - loaded completely 140892.30295448302 10835.4765625 True
+2026-01-07T12:44:22.941026 - [ExecutionTimeReporter] Node 179 (CLIPTextEncode): 4.146s [Total nodes tracked: 11]2026-01-07T12:44:22.941100 - 
+2026-01-07T12:44:23.085668 - [ExecutionTimeReporter] Node 178 (CLIPTextEncode): 0.143s [Total nodes tracked: 12]2026-01-07T12:44:23.085715 - 
+2026-01-07T12:44:23.091079 - [ExecutionTimeReporter] Node 111 (WanVideoTextEmbedBridge): 0.004s [Total nodes tracked: 13]2026-01-07T12:44:23.091118 - 
+2026-01-07T12:44:23.094667 - [ExecutionTimeReporter] Node 256 (Get Image Size): 0.001s [Total nodes tracked: 14]2026-01-07T12:44:23.094717 - 
+2026-01-07T12:44:23.096896 - [ExecutionTimeReporter] Node 142 (WanVideoEmptyEmbeds): 0.001s [Total nodes tracked: 15]2026-01-07T12:44:23.097000 - 
+2026-01-07T12:44:23.194787 - [ExecutionTimeReporter] Node 231 (WanVideoLoraSelect): 0.095s [Total nodes tracked: 16]2026-01-07T12:44:23.194826 - 
+2026-01-07T12:44:23.475799 - [ExecutionTimeReporter] Node 139 (WanVideoLoraSelect): 0.279s [Total nodes tracked: 17]2026-01-07T12:44:23.475838 - 
+2026-01-07T12:44:23.477711 - Unloading WanTEModel
+2026-01-07T12:45:28.983605 - CUDA Compute Capability: 9.0
+2026-01-07T12:45:28.983842 - Detected model in_channels: 16
+2026-01-07T12:45:28.983900 - Model cross attention type: t2v, num_heads: 40, num_layers: 40
+2026-01-07T12:45:28.984030 - Model variant detected: 14B
+2026-01-07T12:45:29.058492 - model_type FLOW
+2026-01-07T12:45:29.058624 - adm 0
+2026-01-07T12:45:29.146910 - [ExecutionTimeReporter] Node 22 (WanVideoModelLoader): 65.669s [Total nodes tracked: 18]2026-01-07T12:45:29.146946 - 
+2026-01-07T12:45:29.148173 - Loading LoRA: Instareal_high with strength: 0.8
+2026-01-07T12:45:30.198590 - Loading LoRA: lightx2v_T2V_14B_cfg_step_distill_v2_lora_rank256_bf16 with strength: 3.0
+2026-01-07T12:45:31.162962 - [ExecutionTimeReporter] Node 137 (WanVideoSetLoRAs): 2.015s [Total nodes tracked: 19]2026-01-07T12:45:31.162997 - 
+2026-01-07T12:45:31.165102 - [ExecutionTimeReporter] Node 183 (INTConstant): 0.001s [Total nodes tracked: 20]2026-01-07T12:45:31.165130 - 
+2026-01-07T12:45:31.166733 - [ExecutionTimeReporter] Node 182 (INTConstant): 0.001s [Total nodes tracked: 21]2026-01-07T12:45:31.166757 - 
+2026-01-07T12:45:31.168803 - [ExecutionTimeReporter] Node 238 (PrimitiveFloat): 0.001s [Total nodes tracked: 22]2026-01-07T12:45:31.168828 - 
+2026-01-07T12:45:31.170362 - [ExecutionTimeReporter] Node 181 (INTConstant): 0.001s [Total nodes tracked: 23]2026-01-07T12:45:31.170389 - 
+2026-01-07T12:45:31.172781 - Using accelerate to load and assign model weights to device...
+2026-01-07T12:45:31.174231 - Loading transformer parameters to cuda:0:   0%|          | 0/1095 [00:00<?, ?it/s]2026-01-07T12:45:31.268180 - Loading transformer parameters to cuda:0: 100%|██████████| 1095/1095 [00:00<00:00, 11672.37it/s]2026-01-07T12:45:31.268218 - 
+2026-01-07T12:45:31.268403 - Using 1053 LoRA weight patches for WanVideo model
+2026-01-07T12:45:31.272939 - timesteps: tensor([757, 701], device='cuda:0')
+2026-01-07T12:45:31.273512 - sigmas: tensor([0.7576, 0.7017, 0.6250])
+2026-01-07T12:45:31.437929 - Number of prompts: 1
+2026-01-07T12:45:31.438045 - Section size: 48.0
+2026-01-07T12:45:31.438094 - Context schedule enabled: 21 frames, 1 stride, 6 overlap
+2026-01-07T12:45:31.993521 - Input sequence length: 205128
+2026-01-07T12:45:31.993637 - Sampling 189 frames at 2112x1184 with 2 steps
+2026-01-07T12:45:32.363663 -   0%|          | 0/2 [00:00<?, ?it/s]2026-01-07T12:45:32.364918 - New window pattern (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20) -> ID 0
+2026-01-07T12:45:32.365053 - Prompt index: 0
+2026-01-07T12:45:32.789876 - Error during model prediction: SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+2026-01-07T12:45:33.403220 -   0%|          | 0/2 [00:01<?, ?it/s]2026-01-07T12:45:33.403261 - 
+2026-01-07T12:45:33.403433 - Error during sampling: SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+2026-01-07T12:45:33.904076 - !!! Exception during processing !!! SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+2026-01-07T12:45:33.911944 - Traceback (most recent call last):
+  File "/comfyui/execution.py", line 496, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, hidden_inputs=hidden_inputs)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/execution.py", line 315, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, hidden_inputs=hidden_inputs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/execution.py", line 289, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "/comfyui/execution.py", line 277, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 3667, in process
+    raise e
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 3126, in process
+    noise_pred_context, new_teacache = predict_with_cfg(
+                                       ^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 2714, in predict_with_cfg
+    raise e
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 2615, in predict_with_cfg
+    noise_pred_cond, cache_state_cond = transformer(
+                                        ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 2165, in forward
+    x, x_ip = block(x, x_ip=x_ip, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 944, in forward
+    y = self.self_attn.forward(q, k, v, seq_lens)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 337, in forward
+    x = attention(q, k, v, k_lens=seq_lens, attention_mode=attention_mode)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/attention.py", line 203, in attention
+    return sageattn_func(q, k, v, tensor_layout="NHD").contiguous()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 838, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/attention.py", line 28, in sageattn_func
+    return sageattn(q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=is_causal, tensor_layout=tensor_layout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/sageattention/core.py", line 148, in sageattn
+    return sageattn_qk_int8_pv_fp8_cuda_sm90(q, k, v, tensor_layout=tensor_layout, is_causal=is_causal, sm_scale=sm_scale, return_lse=return_lse, pv_accum_dtype="fp32+fp32")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 838, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/sageattention/core.py", line 858, in sageattn_qk_int8_pv_fp8_cuda_sm90
+    assert SM90_ENABLED, "SM90 kernel is not available. Make sure you GPUs with compute capability 9.0."
+           ^^^^^^^^^^^^
+AssertionError: SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+
+2026-01-07T12:45:33.918738 - [ExecutionTimeReporter] Node 222 (WanVideoSampler): 2.747s [Total nodes tracked: 24]2026-01-07T12:45:33.918771 - 
+2026-01-07T12:45:33.920054 - Prompt executed in 118.80 seconds
+2026-01-07T12:46:05.570175 - got prompt
+2026-01-07T12:46:05.867983 - Failed to validate prompt for output 298:
+2026-01-07T12:46:05.868118 - * UpscaleModelLoader 316:
+2026-01-07T12:46:05.868153 -   - Value not in list: model_name: '4x-ClearRealityV1.pth' not in []
+2026-01-07T12:46:05.868182 - Output will be ignored
+2026-01-07T12:46:05.870145 - Failed to validate prompt for output 185:
+2026-01-07T12:46:05.870276 - Output will be ignored
+2026-01-07T12:46:05.870413 - Failed to validate prompt for output 347:
+2026-01-07T12:46:05.870449 - Output will be ignored
+2026-01-07T12:46:05.870515 - Failed to validate prompt for output 344:
+2026-01-07T12:46:05.870546 - Output will be ignored
+2026-01-07T12:46:05.870619 - Failed to validate prompt for output 343:
+2026-01-07T12:46:05.870652 - Output will be ignored
+2026-01-07T12:46:05.874499 - Using selector: EpollSelector
+2026-01-07T12:46:05.917359 - [ExecutionTimeReporter] Started tracking workflow c3ff8926-6722-4866-9db3-31bbd6fe22cf2026-01-07T12:46:05.917387 - 
+2026-01-07T12:46:05.919272 - [ExecutionTimeReporter] Node 301 (PreviewImage): 0.001s [Total nodes tracked: 1]2026-01-07T12:46:05.919295 - 
+2026-01-07T12:46:05.921396 - Using accelerate to load and assign model weights to device...
+2026-01-07T12:46:05.921774 - Loading transformer parameters to cuda:0:   0%|          | 0/1095 [00:00<?, ?it/s]2026-01-07T12:46:06.014736 - Loading transformer parameters to cuda:0: 100%|██████████| 1095/1095 [00:00<00:00, 11798.40it/s]2026-01-07T12:46:06.014765 - 
+2026-01-07T12:46:06.014882 - Using 1053 LoRA weight patches for WanVideo model
+2026-01-07T12:46:06.018736 - timesteps: tensor([757, 701], device='cuda:0')
+2026-01-07T12:46:06.019208 - sigmas: tensor([0.7576, 0.7017, 0.6250])
+2026-01-07T12:46:06.192965 - Number of prompts: 1
+2026-01-07T12:46:06.193098 - Section size: 48.0
+2026-01-07T12:46:06.193144 - Context schedule enabled: 21 frames, 1 stride, 6 overlap
+2026-01-07T12:46:06.668778 - Input sequence length: 205128
+2026-01-07T12:46:06.668984 - Sampling 189 frames at 2112x1184 with 2 steps
+2026-01-07T12:46:07.045834 -   0%|          | 0/2 [00:00<?, ?it/s]2026-01-07T12:46:07.049819 - New window pattern (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20) -> ID 0
+2026-01-07T12:46:07.050098 - Prompt index: 0
+2026-01-07T12:46:07.198148 - Error during model prediction: SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+2026-01-07T12:46:07.723862 -   0%|          | 0/2 [00:00<?, ?it/s]2026-01-07T12:46:07.723961 - 
+2026-01-07T12:46:07.724142 - Error during sampling: SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+2026-01-07T12:46:08.129746 - !!! Exception during processing !!! SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+2026-01-07T12:46:08.135680 - Traceback (most recent call last):
+  File "/comfyui/execution.py", line 496, in execute
+    output_data, output_ui, has_subgraph, has_pending_tasks = await get_output_data(prompt_id, unique_id, obj, input_data_all, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, hidden_inputs=hidden_inputs)
+                                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/execution.py", line 315, in get_output_data
+    return_values = await _async_map_node_over_list(prompt_id, unique_id, obj, input_data_all, obj.FUNCTION, allow_interrupt=True, execution_block_cb=execution_block_cb, pre_execute_cb=pre_execute_cb, hidden_inputs=hidden_inputs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/execution.py", line 289, in _async_map_node_over_list
+    await process_inputs(input_dict, i)
+  File "/comfyui/execution.py", line 277, in process_inputs
+    result = f(**inputs)
+             ^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 3667, in process
+    raise e
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 3126, in process
+    noise_pred_context, new_teacache = predict_with_cfg(
+                                       ^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 2714, in predict_with_cfg
+    raise e
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/nodes.py", line 2615, in predict_with_cfg
+    noise_pred_cond, cache_state_cond = transformer(
+                                        ^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 2165, in forward
+    x, x_ip = block(x, x_ip=x_ip, **kwargs)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 944, in forward
+    y = self.self_attn.forward(q, k, v, seq_lens)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/model.py", line 337, in forward
+    x = attention(q, k, v, k_lens=seq_lens, attention_mode=attention_mode)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/attention.py", line 203, in attention
+    return sageattn_func(q, k, v, tensor_layout="NHD").contiguous()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 838, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/comfyui/custom_nodes/ComfyUI-WanVideoWrapper/wanvideo/modules/attention.py", line 28, in sageattn_func
+    return sageattn(q, k, v, attn_mask=attn_mask, dropout_p=dropout_p, is_causal=is_causal, tensor_layout=tensor_layout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/sageattention/core.py", line 148, in sageattn
+    return sageattn_qk_int8_pv_fp8_cuda_sm90(q, k, v, tensor_layout=tensor_layout, is_causal=is_causal, sm_scale=sm_scale, return_lse=return_lse, pv_accum_dtype="fp32+fp32")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/torch/_dynamo/eval_frame.py", line 838, in _fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/venv/lib/python3.12/site-packages/sageattention/core.py", line 858, in sageattn_qk_int8_pv_fp8_cuda_sm90
+    assert SM90_ENABLED, "SM90 kernel is not available. Make sure you GPUs with compute capability 9.0."
+           ^^^^^^^^^^^^
+AssertionError: SM90 kernel is not available. Make sure you GPUs with compute capability 9.0.
+
+2026-01-07T12:46:08.142241 - [ExecutionTimeReporter] Node 222 (WanVideoSampler): 2.222s [Total nodes tracked: 2]2026-01-07T12:46:08.142266 - 
+2026-01-07T12:46:08.143264 - Prompt executed in 2.27 seconds
+
+```
+## Attached Workflow
+Please make sure that workflow does not contain any sensitive information such as API keys or passwords.
+```
+Workflow too large. Please manually upload the workflow from local file system.
+```
+
+## Additional Context
+(Please add any additional context or steps to reproduce the error here)
