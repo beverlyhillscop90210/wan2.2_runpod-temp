@@ -322,3 +322,4 @@ For issues and questions:
 
 **Built with ❤️ for the ComfyUI and RunPod community**
 
+# Trigger build Wed Jan 21 15:58:15 WET 2026
